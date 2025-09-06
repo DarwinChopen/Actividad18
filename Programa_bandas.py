@@ -1,5 +1,33 @@
 import tkinter as tk
 
+class Participante:
+    def  __init__(self,nombre,institucion):
+        self.nombre=nombre
+        self.institucion=institucion
+
+    def mostrar_info(self):
+        return f"{self.nombre} — {self.institucion}"
+
+class Banda(Participante):
+    Lista_Categorias=["Primaria", "Basico", "Diversificado"]
+    Lista_Criterios=["Ritmo", "Uniformidad", "Coreografia", "Alineacion", "Puntualidad"]
+
+    def __init__(self,nombre,institucion,categoria):
+        super().__init__(nombre,institucion)
+        self._categoria=None
+        self.puntos={}
+        self.set_categoria(categoria)
+
+    def set_categoria(self,categoria):
+        cate = categoria
+        if cate in Banda.Lista_Categorias:
+            self._categoria = cate
+            print("Categoria Valida")
+        else:
+            print("Categoria Invalida")
+
+
+
 
 class ConcursoBandasApp:
     def __init__(self):
