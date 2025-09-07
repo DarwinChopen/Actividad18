@@ -15,9 +15,6 @@ class Banda:
             "alineacion": 0,
             "puntualidad": 0
         }
-
-
-
     def registrar_puntajes(self,puntajes_ingresados):
         if set(puntajes_ingresados.keys())!= set(self.puntajes.keys()):
             return False,"Ingrese los datos completos"
@@ -57,7 +54,6 @@ class Banda:
         else:
             print(f"Nombre: {self.nombre} | Institución: {self.institucion} | Categoría: {self.categoria} | Pendiente de evaluación")
 
-
 class Concurso:
     def __init__(self):
         self.bandas = {}
@@ -75,7 +71,6 @@ class Concurso:
         self.bandas[clave] = Banda(nombre, institucion, categoria)
         print("Se agrego con exito")
         return  True, "Banda inscrita"
-
 
     def registrar_evaluacion(self, nombre_banda, nuevos_puntajes):
         clave = self._clave(nombre_banda)
@@ -98,10 +93,7 @@ class Concurso:
                 p["puntualidad"],
                 b.nombre
             )
-
         return sorted(self.bandas.values(), key=clave_orden, reverse=True)
-
-
 class ConcursoBandasApp:
 
     def __init__(self):
@@ -166,9 +158,6 @@ class ConcursoBandasApp:
                 messagebox.showwarning("Aviso", mensaje)
 
         tk.Button(ventana_inscribir, text="Guardar", command=guardar).pack(pady=12)
-
-
-
     def registrar_evaluacion(self):
         print("Se abrió la ventana: Registrar Evaluación")
 
@@ -226,7 +215,7 @@ class ConcursoBandasApp:
     def listar_bandas(self):
         ventana_listar = tk.Toplevel(self.ventana)
         ventana_listar.title("Listado de Bandas")
-        ventana_listar.geometry("800*250")
+        ventana_listar.geometry("800x250")
 
         bandas = self.concurso.listar_bandas()
         if not bandas:
@@ -254,18 +243,58 @@ class ConcursoBandasApp:
 
     def ver_ranking(self):
         print("Se abrió la ventana: Ranking Final")
-        tk.Toplevel(self.ventana).title("Ranking Final")
 
         ventana_ranking=tk.Toplevel(self.ventana)
         ventana_ranking.title("Rangin Final")
-        ventana_ranking.geometry("800*250")
+        ventana_ranking.geometry("1000x250")
 
         bandas = self.concurso.ranking()
         if not bandas:
             tk.Label(ventana_ranking, text="No hay bandas registradas.").pack(pady=20)
             return
 
+        columnas = ("pos", "Nombre", "Institución", "Categoría", "Total","Ritmo", "Uniformidad", "Coreografia", "Alineacion", "Puntualidad")
 
+        tree = ttk.Treeview(ventana_ranking, columns=columnas, show="headings", height=16)
+        tree.heading("pos", text="#")
+        tree.heading("Nombre", text="Nombre")
+        tree.heading("Institución", text="Institución")
+        tree.heading("Categoría", text="Categoría")
+        tree.heading("Total", text="Total")
+        tree.heading("Ritmo", text="Ritmo")
+        tree.heading("Uniformidad", text="Uniformidad")
+        tree.heading("Coreografia", text="Coreografía")
+        tree.heading("Alineacion", text="Alineación")
+        tree.heading("Puntualidad", text="Puntualidad")
 
+        # Configura columnas con los ids válidos
+        tree.column("pos", width=50, anchor="center")
+        tree.column("Nombre", width=180, anchor="center")
+        tree.column("Institución", width=180, anchor="center")
+        tree.column("Categoría", width=120, anchor="center")
+        tree.column("Total", width=80, anchor="center")
+        for c in ("Ritmo", "Uniformidad", "Coreografia", "Alineacion", "Puntualidad"):
+            tree.column(c, width=100, anchor="center")
+        pos = 1
+        for banda in bandas:
+            puntaje = banda.puntajes
+            tree.insert(#la babla
+                "",
+                "end",#fila al final
+                values=(
+                    pos,
+                    banda.nombre,
+                    banda.institucion,
+                    banda.categoria,
+                    banda.total(),
+                    puntaje["ritmo"],
+                    puntaje["uniformidad"],
+                    puntaje["coreografia"],
+                    puntaje["alineacion"],
+                    puntaje["puntualidad"]
+                )
+            )
+            pos += 1
+        tree.pack(fill="both", expand=True, padx=10, pady=10)
 if __name__ == "__main__":
     ConcursoBandasApp()
