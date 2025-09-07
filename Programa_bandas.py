@@ -28,8 +28,33 @@ class Banda:
                 return f"El puntaje de {criterio} debe ser un número entero."
             if numero < 0 or numero> 10:
                 return f"El puntaje de {criterio} debe estar entre 0 y 10."
-            self.puntajes[criterio] = n
+            self.puntajes[criterio] = numero
         return "Puntajes registrados"
+
+    def total(self):
+        total=0
+        for valor in self.puntajes.values():
+            total=total+valor
+        return  total
+
+    """def promedio(self):
+        suma=0
+        contador=0
+        for valor in self.puntajes.values():
+            suma += valor
+            contador += 1
+            resultado=suma/contador
+        return resultado if contador > 0 else 0"""
+
+    def promedio(self):
+        return self.total() / len(self.puntajes)
+
+    def info(self):
+        if any(self.puntajes.values()):
+            print(f"Nombre: {self.nombre} | Institución: {self.institucion} | Categoría: {self.categoria} | Total: {self.total()} | Promedio: {round(self.promedio(), 2)}")
+        else:
+            print(f"Nombre: {self.nombre} | Institución: {self.institucion} | Categoría: {self.categoria} | Pendiente de evaluación")
+
 
 
 
