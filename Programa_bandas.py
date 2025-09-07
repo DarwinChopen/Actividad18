@@ -18,7 +18,7 @@ class Banda:
 
 
 
-    def registar_puntajes(self,puntajes_ingresados):
+    def registrar_puntajes(self,puntajes_ingresados):
         if set(puntajes_ingresados.keys())!= set(self.puntajes.keys()):
             return False,"Ingrese los datos completos"
 
@@ -87,7 +87,6 @@ class Concurso:
         return list(self.bandas.values())
 
     def ranking(self):
-        # Orden: total, ritmo, uniformidad, coreografia, alineacion, puntualidad (desc) y nombre (asc)
         def clave_orden(b):
             p = b.puntajes
             return (
@@ -175,7 +174,17 @@ class ConcursoBandasApp:
 
         ventana_evaluacion= tk.Toplevel(self.ventana)
         ventana_evaluacion.title("Registrar Calificaciones")
-        ventana_evaluacion.geometry("400x250")
+        ventana_evaluacion.geometry("400x410")
+
+        tk.Label(ventana_evaluacion, text="Seleccione Banda:").pack(pady=5)
+        nombres = [bandas.nombre for bandas in self.concurso.listar_bandas()]
+        if not nombres:
+            messagebox.showwarning("Aviso", "No hay bandas inscritas, Ingrese una.")
+            ventana_evaluacion.destroy()
+            return
+        combo = ttk.Combobox(ventana_evaluacion, values=nombres, state="readonly")
+        combo.current(0)
+        combo.pack(pady=5)
 
         tk.Label(ventana_evaluacion, text="Ritmo:").pack(pady=5)
         entrada_ritmo = tk.Entry(ventana_evaluacion)
@@ -197,10 +206,27 @@ class ConcursoBandasApp:
         entrada_puntualidad = tk.Entry(ventana_evaluacion)
         entrada_puntualidad.pack(pady=5)
 
+        def guardar_eval():
+            nuevos_puntajes = {
+                "ritmo": entrada_ritmo.get(),
+                "uniformidad": entrada_uniformidad.get(),
+                "coreografia": entrada_coreografia.get(),
+                "alineacion": entrada_alineacion.get(),
+                "puntualidad": entrada_puntualidad.get()
+            }
+            ok, msg = self.concurso.registrar_evaluacion(combo.get(), nuevos_puntajes)
+            if ok:
+                messagebox.showinfo("Éxito", msg)
+                ventana_evaluacion.destroy()
+            else:
+                messagebox.showwarning("Aviso", msg)
+
+        tk.Button(ventana_evaluacion, text="Guardar Evaluación", command=guardar_eval).pack(pady=12)
+
     def listar_bandas(self):
         ventana_listar = tk.Toplevel(self.ventana)
         ventana_listar.title("Listado de Bandas")
-        ventana_listar.geometry("400x250")
+        ventana_listar.geometry("800*250")
 
         bandas = self.concurso.listar_bandas()
         if not bandas:
@@ -211,24 +237,34 @@ class ConcursoBandasApp:
         tree = ttk.Treeview(ventana_listar, columns=columnas, show="headings", height=12)
         for c in columnas:
             tree.heading(c, text=c)
-        tree.column("Nombre", width=160, anchor="center")
-        tree.column("Institución", width=160, anchor="center")
-        tree.column("Categoría", width=120, anchor="center")
-        tree.column("Total", width=80, anchor="center")
+        tree.column("Nombre", width=150, anchor="center")
+        tree.column("Institución", width=150, anchor="center")
+        tree.column("Categoría", width=150, anchor="center")
+        tree.column("Total", width=100, anchor="center")
         tree.column("Promedio", width=100, anchor="center")
 
-        for b in bandas:
-            hay_puntajes = any(b.puntajes.values())
-            total = b.total() if hay_puntajes else "-"
-            prom = f"{b.promedio()}" if hay_puntajes else "-"
+        for banda in bandas:
+            hay_puntajes = any(banda.puntajes.values())
+            total = banda.total() if hay_puntajes else "-"
+            prom = f"{banda.promedio()}" if hay_puntajes else "-"
 
-            tree.insert("", "end", values=(b.nombre, b.institucion, b.categoria, total, prom))
+            tree.insert("", "end", values=(banda.nombre, banda.institucion, banda.categoria, total, prom))
 
         tree.pack(fill="both", expand=True, padx=10, pady=10)
 
     def ver_ranking(self):
         print("Se abrió la ventana: Ranking Final")
         tk.Toplevel(self.ventana).title("Ranking Final")
+
+        ventana_ranking=tk.Toplevel(self.ventana)
+        ventana_ranking.title("Rangin Final")
+        ventana_ranking.geometry("800*250")
+
+        bandas = self.concurso.ranking()
+        if not bandas:
+            tk.Label(ventana_ranking, text="No hay bandas registradas.").pack(pady=20)
+            return
+
 
 
 if __name__ == "__main__":
