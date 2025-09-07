@@ -1,30 +1,35 @@
 import tkinter as tk
 
-class Participante:
-    def  __init__(self,nombre,institucion):
+class Banda:
+    def  __init__(self,nombre,institucion,categoria):
         self.nombre=nombre
         self.institucion=institucion
+        self.categoria=categoria
+        self.puntajes={
+            "ritmo": 0,
+            "uniformidad": 0,
+            "coreografia": 0,
+            "alineacion": 0,
+            "puntualidad": 0
+        }
 
-    def mostrar_info(self):
-        return f"{self.nombre} — {self.institucion}"
-
-class Banda(Participante):
     Lista_Categorias=["Primaria", "Basico", "Diversificado"]
     Lista_Criterios=["Ritmo", "Uniformidad", "Coreografia", "Alineacion", "Puntualidad"]
 
-    def __init__(self,nombre,institucion,categoria):
-        super().__init__(nombre,institucion)
-        self._categoria=None
-        self.puntos={}
-        self.set_categoria(categoria)
+    def registar_puntajes(self,puntajes_ingresados):
+        if set(puntajes_ingresados.keys())!= set(self.puntajes.keys()):
+            print("Ingrese los datos completos")
 
-    def set_categoria(self,categoria):
-        cate = categoria
-        if cate in Banda.Lista_Categorias:
-            self._categoria = cate
-            print("Categoria Valida")
-        else:
-            print("Categoria Invalida")
+        for criterio, valor in puntajes_ingresados.items():
+            try:
+               # numero=input("Ingres el valor")
+                numero = int(valor)
+            except:
+                return f"El puntaje de {criterio} debe ser un número entero."
+            if numero < 0 or numero> 10:
+                return f"El puntaje de {criterio} debe estar entre 0 y 10."
+            self.puntajes[criterio] = n
+        return "Puntajes registrados"
 
 
 
