@@ -1,4 +1,7 @@
 import tkinter as tk
+from tkinter import messagebox, ttk
+Lista_Categorias = ["Primaria", "Basico", "Diversificado"]
+Lista_Criterios = ["Ritmo", "Uniformidad", "Coreografia", "Alineacion", "Puntualidad"]
 
 class Banda:
     def  __init__(self,nombre,institucion,categoria):
@@ -13,23 +16,22 @@ class Banda:
             "puntualidad": 0
         }
 
-    Lista_Categorias=["Primaria", "Basico", "Diversificado"]
-    Lista_Criterios=["Ritmo", "Uniformidad", "Coreografia", "Alineacion", "Puntualidad"]
+
 
     def registar_puntajes(self,puntajes_ingresados):
         if set(puntajes_ingresados.keys())!= set(self.puntajes.keys()):
-            print("Ingrese los datos completos")
+            return False,"Ingrese los datos completos"
 
         for criterio, valor in puntajes_ingresados.items():
             try:
                # numero=input("Ingres el valor")
                 numero = int(valor)
             except:
-                return f"El puntaje de {criterio} debe ser un número entero."
+                return False, f"El puntaje de {criterio} debe ser un número entero."
             if numero < 0 or numero> 10:
-                return f"El puntaje de {criterio} debe estar entre 0 y 10."
+                return False, f"El puntaje de {criterio} debe estar entre 0 y 10."
             self.puntajes[criterio] = numero
-        return "Puntajes registrados"
+        return True, "Puntajes registrados"
 
     def total(self):
         total=0
@@ -56,13 +58,57 @@ class Banda:
             print(f"Nombre: {self.nombre} | Institución: {self.institucion} | Categoría: {self.categoria} | Pendiente de evaluación")
 
 
+class Concurso:
+    def __init__(self):
+        self.bandas = {}
 
+    def _clave(self, nombre):
+        return nombre
+
+    def inscribir_banda(self, nombre, institucion, categoria):
+        if not nombre or not institucion:
+            return False,"Nombre e institución son obligatorios."
+
+        clave = self._clave(nombre)
+        if clave in self.bandas:
+            return False, "Ya existe una banda con ese nombre."
+        self.bandas[clave] = Banda(nombre, institucion, categoria)
+        print("Se agrego con exito")
+        return  True, "Banda inscrita"
+
+
+    def registrar_evaluacion(self, nombre_banda, nuevos_puntajes):
+        clave = self._clave(nombre_banda)
+        if clave not in self.bandas:
+            return False, "Banda no encontrada."
+        return self.bandas[clave].registrar_puntajes(nuevos_puntajes)
+
+    def listar_bandas(self):
+        return list(self.bandas.values())
+
+    def ranking(self):
+        # Orden: total, ritmo, uniformidad, coreografia, alineacion, puntualidad (desc) y nombre (asc)
+        def clave_orden(b):
+            p = b.puntajes
+            return (
+                b.total(),
+                p["ritmo"],
+                p["uniformidad"],
+                p["coreografia"],
+                p["alineacion"],
+                p["puntualidad"],
+                b.nombre
+            )
+
+        return sorted(self.bandas.values(), key=clave_orden, reverse=True)
 
 
 class ConcursoBandasApp:
+
     def __init__(self):
+        self.concurso = Concurso()
         self.ventana = tk.Tk()
-        self.ventana.title("Concurso de Bandas - Quetzaltenango")
+        self.ventana.title("Concurso de Bandas - Quetzaltenango 2025")
         self.ventana.geometry("500x300")
         self.ventana.configure(bg="grey")
         self.ventana.resizable(False, False)
@@ -93,7 +139,7 @@ class ConcursoBandasApp:
         print("Se abrió la ventana: Inscribir Banda")
 
         ventana_inscribir = tk.Toplevel(self.ventana)
-        ventana_inscribir.title("Inscribir Bandaaaa")
+        ventana_inscribir.title("Inscribir Banda")
         ventana_inscribir.geometry("400x250")
 
         tk.Label(ventana_inscribir, text="Nombre de la Banda:").pack(pady=5)
@@ -105,8 +151,22 @@ class ConcursoBandasApp:
         entrada_colegio.pack(pady=5)
 
         tk.Label(ventana_inscribir, text="Categoria:").pack(pady=5)
-        entrada_categoria = tk.Entry(ventana_inscribir)
-        entrada_categoria.pack(pady=5)
+        var_categoria = tk.StringVar(value=Lista_Categorias[0])
+        tk.OptionMenu(ventana_inscribir, var_categoria, *Lista_Categorias).pack(pady=5)
+
+        def guardar():
+            var, mensaje = self.concurso.inscribir_banda(
+                entrada_nombre.get(),
+                entrada_colegio.get(),
+                var_categoria.get()
+            )
+            if var:
+                messagebox.showinfo("Éxito", mensaje)
+                ventana_inscribir.destroy()
+            else:
+                messagebox.showwarning("Aviso", mensaje)
+
+        tk.Button(ventana_inscribir, text="Guardar", command=guardar).pack(pady=12)
 
 
 
