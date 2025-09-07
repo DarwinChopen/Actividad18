@@ -198,8 +198,33 @@ class ConcursoBandasApp:
         entrada_puntualidad.pack(pady=5)
 
     def listar_bandas(self):
-        print("Se abrió la ventana: Listado de Bandas")
-        tk.Toplevel(self.ventana).title("Listado de Bandas")
+        ventana_listar = tk.Toplevel(self.ventana)
+        ventana_listar.title("Listado de Bandas")
+        ventana_listar.geometry("400x250")
+
+        bandas = self.concurso.listar_bandas()
+        if not bandas:
+            tk.Label(ventana_listar, text="No hay bandas registradas.").pack(pady=20)
+            return
+
+        columnas = ("Nombre", "Institución", "Categoría", "Total", "Promedio")
+        tree = ttk.Treeview(ventana_listar, columns=columnas, show="headings", height=12)
+        for c in columnas:
+            tree.heading(c, text=c)
+        tree.column("Nombre", width=160, anchor="center")
+        tree.column("Institución", width=160, anchor="center")
+        tree.column("Categoría", width=120, anchor="center")
+        tree.column("Total", width=80, anchor="center")
+        tree.column("Promedio", width=100, anchor="center")
+
+        for b in bandas:
+            hay_puntajes = any(b.puntajes.values())
+            total = b.total() if hay_puntajes else "-"
+            prom = f"{b.promedio()}" if hay_puntajes else "-"
+
+            tree.insert("", "end", values=(b.nombre, b.institucion, b.categoria, total, prom))
+
+        tree.pack(fill="both", expand=True, padx=10, pady=10)
 
     def ver_ranking(self):
         print("Se abrió la ventana: Ranking Final")
